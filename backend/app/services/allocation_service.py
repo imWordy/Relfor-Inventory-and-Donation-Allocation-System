@@ -13,6 +13,11 @@ from app.models.user import User
 from app.schemas.allocation import AllocationCreate, AllocationUpdate
 
 def create_allocation(db: Session, alloc_in: AllocationCreate, current_user: User) -> Allocation:
+    """
+    Core Allocation Engine Logic.
+    Calculates and securely creates a new resource allocation for a given request.
+    It deducts from current inventory transactionally and handles partial fulfillment.
+    """
     req = db.query(Request).filter(Request.id == alloc_in.request_id).first()
     if not req:
         raise HTTPException(
