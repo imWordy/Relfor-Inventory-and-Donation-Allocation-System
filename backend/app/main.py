@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import health, auth, resources, inventory
+from app.routers import health, auth, resources, inventory, requests, allocations, distributions, donations
 from app.core.config import settings
 from app.core.errors import register_exception_handlers
 
@@ -15,3 +15,7 @@ app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(resources.router)
 app.include_router(inventory.router)
+app.include_router(requests.router)
+app.include_router(allocations.router)
+app.include_router(distributions.router)
+app.include_router(donations.router)
