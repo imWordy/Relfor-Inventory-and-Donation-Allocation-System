@@ -10,6 +10,11 @@ from app.models.user import User
 from app.schemas.distribution import DistributionCreate
 
 def create_distribution(db: Session, dist_in: DistributionCreate, current_user: User) -> Distribution:
+    """
+    Core Distribution Logic (Phase 12).
+    Records actual physical handover of resources based on a pre-existing allocation.
+    Updates corresponding allocation and request statuses.
+    """
     alloc = db.query(Allocation).filter(Allocation.id == dist_in.allocation_id).first()
     if not alloc:
         raise HTTPException(
