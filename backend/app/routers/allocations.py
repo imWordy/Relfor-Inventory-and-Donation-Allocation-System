@@ -22,6 +22,11 @@ def create_allocation(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_staff_or_admin),
 ):
+    """
+    Creates an allocation.
+    Validates requested items, safely reads inventory, limits allocation,
+    updates request states, and commits all changes transactionally.
+    """
     return allocation_service.create_allocation(db=db, alloc_in=alloc_in, current_user=current_user)
 
 @router.get(
