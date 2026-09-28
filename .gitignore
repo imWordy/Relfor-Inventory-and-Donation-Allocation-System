@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Production build output
+dist/
+dist-ssr/
+
+# Local environment & IDE files
+.env
+.env.local
+.vscode/
+.idea/
+*.log
