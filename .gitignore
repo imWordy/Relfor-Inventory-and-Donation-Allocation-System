@@ -1,7 +1,21 @@
-RELFOR_EXECUTION_PLAN.md
+# Dependencies
+node_modules/
 venv/
 backend/venv/
+.venv/
+
+# Production build output
+dist/
+dist-ssr/
+
+# Environment & IDE files
 .env
+.env.local
+.vscode/
+.idea/
+*.log
+
+# Python & testing cache
 __pycache__/
 *.pyc
 .pytest_cache/
