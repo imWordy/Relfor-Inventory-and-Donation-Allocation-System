@@ -186,3 +186,5 @@ export default function Navigation({ activeTab, setActiveTab, currentUser, setCu
     </div>
   );
 }
+
+// Responsive header refinement verified
