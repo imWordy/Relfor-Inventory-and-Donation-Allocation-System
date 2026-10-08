@@ -38,8 +38,10 @@ def create_allocation(db: Session, alloc_in: AllocationCreate, current_user: Use
     allocation_item_records = []
     seen_request_items = set()
 
+    # Pre-validate all items before mutating database session state
     for item_in in alloc_in.items:
         if item_in.request_item_id in seen_request_items:
+            db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Duplicate request_item_id '{item_in.request_item_id}' in allocation"
@@ -48,12 +50,14 @@ def create_allocation(db: Session, alloc_in: AllocationCreate, current_user: Use
 
         req_item = req_items_map.get(item_in.request_item_id)
         if not req_item:
+            db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Request item '{item_in.request_item_id}' does not belong to request '{req.id}'"
             )
 
         if req_item.resource_id != item_in.resource_id:
+            db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Resource ID '{item_in.resource_id}' does not match request item resource '{req_item.resource_id}'"
@@ -62,6 +66,7 @@ def create_allocation(db: Session, alloc_in: AllocationCreate, current_user: Use
         # Check requested vs already allocated
         remaining_needed = req_item.requested_quantity - req_item.allocated_quantity
         if item_in.allocated_quantity > remaining_needed:
+            db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Allocated quantity ({item_in.allocated_quantity}) exceeds remaining needed quantity ({remaining_needed}) for resource {item_in.resource_id}"
@@ -70,22 +75,25 @@ def create_allocation(db: Session, alloc_in: AllocationCreate, current_user: Use
         # Check current stock
         res = db.query(Resource).filter(Resource.id == item_in.resource_id).first()
         if not res:
+            db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Resource '{item_in.resource_id}' not found"
             )
 
         if item_in.allocated_quantity > res.current_stock:
+            db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Insufficient stock for '{res.name}'. Available: {res.current_stock}, requested allocation: {item_in.allocated_quantity}"
             )
 
-        # Deduct current stock and update allocated quantity on request item
-        res.current_stock -= item_in.allocated_quantity
-        req_item.allocated_quantity += item_in.allocated_quantity
+        allocation_item_records.append((req_item, res, item_in.allocated_quantity))
 
-        allocation_item_records.append((req_item, item_in.allocated_quantity))
+    # All items successfully validated; now mutate models transactionally
+    for req_item, res, qty in allocation_item_records:
+        res.current_stock -= qty
+        req_item.allocated_quantity += qty
 
     db_alloc = Allocation(
         request_id=req.id,
@@ -96,7 +104,7 @@ def create_allocation(db: Session, alloc_in: AllocationCreate, current_user: Use
     db.add(db_alloc)
     db.flush()
 
-    for req_item, qty in allocation_item_records:
+    for req_item, res, qty in allocation_item_records:
         alloc_item = AllocationItem(
             allocation_id=db_alloc.id,
             request_item_id=req_item.id,
