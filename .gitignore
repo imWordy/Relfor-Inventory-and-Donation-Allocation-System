@@ -19,3 +19,9 @@ dist-ssr/
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# Internal Planning Documents
+RELFOR_EXECUTION_PLAN.md
+ADITYA_WORKLOAD_SUMMARY.md
+*WORKLOAD*.md
+rewrite*.sh
