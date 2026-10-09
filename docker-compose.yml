@@ -20,7 +20,47 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - relfor-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: relfor_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PROJECT_NAME: "Relfor Inventory & Donation Allocation API"
+      DATABASE_URL: "postgresql+psycopg://${DB_USER:-relfor_user}:${DB_PASSWORD:-relfor_password}@postgres:5432/${DB_NAME:-relfor_db}"
+      SECRET_KEY: ${SECRET_KEY:-production_secret_key_change_me}
+      ALGORITHM: "HS256"
+      ACCESS_TOKEN_EXPIRE_MINUTES: 120
+    ports:
+      - "8000:8000"
+    networks:
+      - relfor-net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: relfor_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "3000:80"
+    networks:
+      - relfor-net
 
 volumes:
   postgres_data:
     name: relfor_postgres_data
+
+networks:
+  relfor-net:
+    driver: bridge
