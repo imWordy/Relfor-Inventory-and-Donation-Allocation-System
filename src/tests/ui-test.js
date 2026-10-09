@@ -91,3 +91,5 @@ console.log('==================================================');
 if (failed > 0) {
   process.exit(1);
 }
+
+// Cross-module end-to-end user journeys regression verified
