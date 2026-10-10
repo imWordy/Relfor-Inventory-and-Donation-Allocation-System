@@ -1,6 +1,7 @@
 from app.schemas.user import UserCreate, UserResponse
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.resource import ResourceCreate, ResourceUpdate, ResourceResponse
+from app.schemas.organization import OrganizationCreate, OrganizationUpdate, OrganizationResponse
 from app.schemas.request import (
     RequestCreate,
     RequestUpdate,
@@ -23,6 +24,13 @@ from app.schemas.donation import (
     DonationCreate,
     DonationResponse,
 )
+from app.schemas.report import (
+    InventoryReportResponse,
+    DonationReportResponse,
+    AllocationReportResponse,
+    DistributionReportResponse,
+    PendingRequestReportResponse,
+)
 
 __all__ = [
     "UserCreate",
@@ -32,6 +40,9 @@ __all__ = [
     "ResourceCreate",
     "ResourceUpdate",
     "ResourceResponse",
+    "OrganizationCreate",
+    "OrganizationUpdate",
+    "OrganizationResponse",
     "RequestCreate",
     "RequestUpdate",
     "RequestResponse",
@@ -46,4 +57,9 @@ __all__ = [
     "DistributionResponse",
     "DonationCreate",
     "DonationResponse",
+    "InventoryReportResponse",
+    "DonationReportResponse",
+    "AllocationReportResponse",
+    "DistributionReportResponse",
+    "PendingRequestReportResponse",
 ]
